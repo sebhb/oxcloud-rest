@@ -1,0 +1,342 @@
+# HTTP Calls to App Suite
+
+
+# Documentation
+#
+# Deployment/Cloud
+# https://documentation.open-xchange.com/components/cloud-api/latest/
+#
+# UI Configuration
+# https://documentation.open-xchange.com/8/ui/configuration/settings-list-of.html
+#
+# HTTP/Infostore
+# https://documentation.open-xchange.com/components/middleware/http/8
+
+
+# Credentials need to be configured in the REST Plugin's settings.
+# Choose "Show All Commands" from the menu and choose "Preferences: Open User Settings (JSON)"
+# Then configure at least one environment.
+#
+# This is an example for a Sandbox environment:
+#
+#  "rest-client.environmentVariables": {
+#    "Sandbox": {
+#        "host": "https://eu.appsuite.cloud",
+#        "brand": "myBrandName",
+#        "brandAuth": "maBrandAuth",
+#        "emailDomain": "mydomain.com",
+#        "contextShortName": "my-context-name"
+#    }
+# }
+
+
+# Other Configuration
+
+@authentication = {{brand}}:{{brandAuth}}
+@baseUrl = {{host}}/cloudapi/v2
+@httpApiBaseUrl = {{host}}/appsuite/api
+
+@contextName = {{brand}}_{{contextShortName}}
+
+@userGivenName = Jimmi
+@userSurName = Tester
+@userNameShort = jimmi.tester
+@userName = {{userNameShort}}@{{emailDomain}}
+@password = secret
+@credentials = name={{userNameShort}}&password={{password}}
+
+
+
+### Contexts
+
+### Get Contexts
+// @name getContexts
+GET {{baseUrl}}/contexts
+authorization: Basic {{authentication}}
+
+### Search Context
+// @name searchContext
+GET {{baseUrl}}/contexts?pattern=*{{contextShortName}}*
+authorization: Basic {{authentication}}
+
+### Create Context
+// @name createContext
+POST {{baseUrl}}/contexts
+Content-Type: application/json
+authorization: Basic {{authentication}}
+
+{
+    "name": "{{contextShortName}}",
+    "adminLogin": "{{contextShortName}}.admin",
+    "adminEmail": "admin@{{emailDomain}}",
+    "adminPassword": "98zgtbhnj/&ZH"
+}
+
+### Delete Context
+// @name deleteContext
+DELETE {{baseUrl}}/contexts/{{contextName}}
+authorization: Basic {{authentication}}
+
+### Change Number of Maximum Users
+// @name changeMaxNumberOfUsers
+PUT {{baseUrl}}/contexts/{{contextName}}
+Content-Type: application/json
+authorization: Basic {{authentication}}
+
+{
+    "maxUser": 10
+}
+
+
+
+### Users
+
+### Create User
+// @name createUser
+POST {{baseUrl}}/users?name={{contextName}}
+Content-Type: application/json
+authorization: Basic {{authentication}}
+
+{
+    "name": "{{userNameShort}}",
+    "password": "{{password}}",
+    "givenName": "{{userGivenName}}",
+    "surName": "{{userSurName}}",
+    "mail": "{{userName}}"
+}
+
+### Delete User
+// @name deleteUser
+DELETE {{baseUrl}}/users/{{userNameShort}}?name={{contextName}}
+authorization: Basic {{authentication}}
+
+### Get Users
+// @name getUsers
+GET {{baseUrl}}/users?name={{contextName}}
+authorization: Basic {{authentication}}
+
+### Get One User (Search)
+// @name getSpecificUser
+GET {{baseUrl}}/users/{{userNameShort}}?name={{contextName}}&includepermissions=True
+authorization: Basic {{authentication}}
+
+
+
+
+
+### Classes of Service
+
+### Change One User to PIM
+// @name changeSpecificUserToPIM
+PUT {{baseUrl}}/users/{{userNameShort}}?name={{contextName}}
+Content-Type: application/json
+authorization: Basic {{authentication}}
+
+{
+    "classOfService": 
+        [
+            "cloud_pim"
+        ]
+}
+
+### Change One User to Productivity
+// @name changeSpecificUserToProductivity
+PUT {{baseUrl}}/users/{{userNameShort}}?name={{contextName}}
+Content-Type: application/json
+authorization: Basic {{authentication}}
+
+{
+    "classOfService": 
+        [
+            "cloud_productivity_security"
+        ]
+}
+
+# "Class of Service" possible values:
+# cloud_pim
+# cloud_productivity
+# cloud_security
+# cloud_productivity_security
+
+### Update Quota
+// @name updateQuota
+PUT {{baseUrl}}/users/{{userNameShort}}?name={{contextName}}
+Content-Type: application/json
+authorization: Basic {{authentication}}
+
+{
+    "unifiedQuota": 2000,
+    "mailQuota": null,
+    "fileQuota": null
+}
+
+# Note that you can use either mailQuota and fileQuota
+# or unifiedQuota. But you can not use unifiedQuota 
+# in combination with any of the other two.
+
+
+
+
+
+### Themes
+
+### Change existing Context Theme
+// @name changeExistingContextTheme
+PUT {{baseUrl}}/contexts/{{contextName}}
+Content-Type: application/json
+authorization: Basic {{authentication}}
+
+{
+    "theme": {
+        "mainColor": "#ff0000",
+        "linkColor": "#283f73",
+        "toolbarColor": "#283f73"
+    }
+}
+
+### Change Brand Theme
+// @name changeBrandTheme
+POST {{baseUrl}}/brand/theme
+Content-Type: application/json
+authorization: Basic {{authentication}}
+
+{
+    "mainColor": "#283f73",
+    "linkColor": "#283f73",
+    "toolbarColor": "#283f73"
+}
+
+# Changing the theme of a context overrides the theme of the branding.
+
+
+
+
+
+### HTTP API
+
+# All calls to an endpoint require a valid session.
+# Except for...
+# 1. The log in call itself
+# 2. VERY few exceptions like getting the version of the App Suite
+
+### Log In
+// @name httpLogin
+POST {{httpApiBaseUrl}}/login?action=login
+Content-Type: application/x-www-form-urlencoded
+
+{{credentials}}
+
+### Log Out
+// @name logOut
+POST {{httpApiBaseUrl}}/login?action=logout&session={{httpLogin.response.body.session}}
+
+### Config
+// @name getConfig
+GET {{httpApiBaseUrl}}/config?session={{httpLogin.response.body.session}}
+Cookie: {{login.response.headers.set-cookie}}
+
+### Get User
+// @name getUser
+GET {{httpApiBaseUrl}}/user?action=get&session={{httpLogin.response.body.session}}
+Cookie: {{login.response.headers.set-cookie}}
+
+### Get Me
+// @name getMe
+GET {{httpApiBaseUrl}}/user/me?session={{httpLogin.response.body.session}}
+Cookie: {{login.response.headers.set-cookie}}
+
+### Get All Users
+// @name getAllUsers
+GET {{httpApiBaseUrl}}/user?action=all&columns=1,501,502&session={{httpLogin.response.body.session}}
+Cookie: {{login.response.headers.set-cookie}}
+
+# Note
+# 1. The admin user by default is "invisible". This can be changed via the JSlob value `io.ox/contacts//showAdmin`.
+# 2. The "column identifiers" are documented here: https://documentation.open-xchange.com/components/middleware/http/8/#!
+
+
+
+
+
+# Documentation of signature settings
+# https://documentation.open-xchange.com/8/ui/configuration/settings-list-of.html#mail
+
+# The procedure to change a signature is as follows:
+# 1. Log in on behalf of the user
+# 2. Add a new signature
+# 3. Set the new signature as default
+# 4. Log out
+
+### Snippets/Signatures
+
+### Get All Snippets
+// @name getAllSnippets
+GET {{httpApiBaseUrl}}/snippet?action=all&session={{httpLogin.response.body.session}}
+Cookie: {{login.response.headers.set-cookie}}
+
+### Get All Signatures
+// @name getAllSignatures
+GET {{httpApiBaseUrl}}/snippet?action=all&type=signature&session={{httpLogin.response.body.session}}
+Cookie: {{login.response.headers.set-cookie}}
+
+### Create New Signature
+// @name newSignature
+PUT {{httpApiBaseUrl}}/snippet?action=new&session={{httpLogin.response.body.session}}
+Cookie: {{login.response.headers.set-cookie}}
+Content-Type: text/javascript
+
+{
+      "content": "<div class=\"default-style\">\n Sent from my awesome service\n</div>",
+      "displayname": "Signature Name",
+      "misc": {
+        "insertion": "below",
+        "content-type": "text/html"
+      },
+      "module": "io.ox/mail",
+      "type": "signature"
+}
+
+### Update Signature
+// @name updateSignature
+PUT {{httpApiBaseUrl}}/snippet?action=update&id={{getAllSignatures.response.body.data[0].id}}&session={{httpLogin.response.body.session}}
+Cookie: {{login.response.headers.set-cookie}}
+Content-Type: text/javascript
+
+{
+      "id": "{{getAllSignatures.response.body.data[0].id}}",
+      "content": "<div class=\"default-style\">\n Sent from my now even better service\n</div>",
+      "displayname": "Signature Name",
+      "misc": {
+        "insertion": "below",
+        "content-type": "text/html"
+      },
+      "module": "io.ox/mail",
+      "type": "signature"
+}
+
+# Note that if you have an open browser and set the defaults signature via API call,
+# you have to log out of the session that set the default signature.
+# You also have to log out and in again in your browser.
+
+### Set Signature as Default
+// @name setDefaultSignature
+PUT {{httpApiBaseUrl}}/jslob?action=set&id=io.ox/mail&session={{httpLogin.response.body.session}}
+Cookie: {{login.response.headers.set-cookie}}
+Content-Type: text/javascript
+
+{
+    "defaultSignature": {
+        "{{userName}}": "{{getAllSignatures.response.body.data[0].id}}"
+    }
+}
+
+
+
+
+
+# Misc JSlob
+
+### Get Mail JSlob
+// @name getMailJslob
+GET {{httpApiBaseUrl}}/jslob?action=get&id=io.ox/mail&session={{httpLogin.response.body.session}}
+Cookie: {{login.response.headers.set-cookie}}

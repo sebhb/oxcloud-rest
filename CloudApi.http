@@ -330,8 +330,25 @@ Content-Type: text/javascript
     }
 }
 
+# The procedure to disable mail categories is analog to signature operations:
+# 1. Sign in as user
+# 2. Disable mail categories
+# 3. Log out
 
+### Disable Mail Categories
+// @name disableMailCategories
+PUT {{httpApiBaseUrl}}/jslob?action=set&id=io.ox/mail&session={{httpLogin.response.body.session}}
+Cookie: {{login.response.headers.set-cookie}}
+Content-Type: text/javascript
 
+{
+    "categories": {
+        "enabled": false,
+        "forced": false,
+        "initialized": "notyetstarted",
+        "list": []
+    }
+}
 
 
 # Misc JSlob

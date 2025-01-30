@@ -152,11 +152,8 @@ authorization: Basic {{authentication}}
         ]
 }
 
-# "Class of Service" possible values:
-# cloud_pim
-# cloud_productivity
-# cloud_security
-# cloud_productivity_security
+# "Class of Service" possible values are documented here:
+# https://confluence-public.open-xchange.com/display/OASC/Class+of+Service
 
 ### Update Quota
 // @name updateQuota
@@ -188,9 +185,8 @@ authorization: Basic {{authentication}}
 
 {
     "theme": {
-        "mainColor": "#ff0000",
-        "linkColor": "#283f73",
-        "toolbarColor": "#283f73"
+        "logoUrlLight": "http://example.com/light.png",
+        "logoUrlDark": "http://example.com/dark.png"
     }
 }
 
@@ -247,7 +243,7 @@ Cookie: {{login.response.headers.set-cookie}}
 
 ### Get All Users
 // @name getAllUsers
-GET {{httpApiBaseUrl}}/user?action=all&columns=1,501,502&session={{httpLogin.response.body.session}}
+GET {{httpApiBaseUrl}}/user?action=all&columns=1,501,502,555,556,557&session={{httpLogin.response.body.session}}
 Cookie: {{login.response.headers.set-cookie}}
 
 # Note
@@ -330,30 +326,40 @@ Content-Type: text/javascript
     }
 }
 
-# The procedure to disable mail categories is analog to signature operations:
-# 1. Sign in as user
-# 2. Disable mail categories
-# 3. Log out
-
-### Disable Mail Categories
-// @name disableMailCategories
-PUT {{httpApiBaseUrl}}/jslob?action=set&id=io.ox/mail&session={{httpLogin.response.body.session}}
-Cookie: {{login.response.headers.set-cookie}}
-Content-Type: text/javascript
-
-{
-    "categories": {
-        "enabled": false,
-        "forced": false,
-        "initialized": "notyetstarted",
-        "list": []
-    }
-}
-
-
 # Misc JSlob
 
 ### Get Mail JSlob
 // @name getMailJslob
 GET {{httpApiBaseUrl}}/jslob?action=get&id=io.ox/mail&session={{httpLogin.response.body.session}}
 Cookie: {{login.response.headers.set-cookie}}
+
+
+# "Single Click Login" (Token Login)
+
+# This generates a very short living session that can be used to login a user
+# without them having to enter their credentials.
+# This can be used, e.g. to enable a user that has just been created to log
+# in with a single click.
+
+# IMPORTANT:
+# The `clientToken` and `authId` set here are hard coded for simplicity sake.
+# This has to be a randomly generated token for every single use in production.
+# The SAME token is then used in the URL for the user to log in.
+
+# See the complete documentation:
+# https://documentation.open-xchange.com/components/middleware/http/8/index.html#!Login/doTokenLogin
+
+@authId=04BA0B6C-D5E1-4177-9CDD-B53CD77F1E44
+@clientToken=8984E12F-2C99-4DAF-B4BE-D8249B1A3F52
+
+# The response will contain a JSON with a key `url`.
+# This will be the url to append to the host name.
+# You will also HAVE TO append the client token sent in this call to the resulting URL.
+# Assume, the client token sent was "123", you would append "&clientToken=123" to the URL.
+
+### Token Login
+// @name tokenLogin
+POST {{httpApiBaseUrl}}/login?action=tokenLogin&authId={{authId}}&jsonResponse=true
+Content-Type: application/x-www-form-urlencoded
+
+login={{userNameShort}}&password={{password}}&client=loginPage&version=1.0&clientToken={{clientToken}}

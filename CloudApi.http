@@ -40,7 +40,7 @@
 
 @userGivenName = Jimmi
 @userSurName = Tester
-@userNameShort = jimmi.tester
+@userNameShort = fred.tester
 @userName = {{userNameShort}}@{{emailDomain}}
 @password = secret
 @credentials = name={{userNameShort}}&password={{password}}
@@ -87,9 +87,23 @@ authorization: Basic {{authentication}}
     "maxUser": 10
 }
 
+### Change Context Theme
+// @name changeContextTheme
+PUT {{baseUrl}}/contexts/{{contextName}}
+Content-Type: application/json
+authorization: Basic {{authentication}}
+
+{
+    "theme": {
+        "mainColor": "#ff0"
+    }
+}
 
 
 ### Users
+
+# Please note, a user will only be able to log in with their name.
+# Therefor, we strongly suggest to use the same value for `name` and `mail`.
 
 ### Create User
 // @name createUser
@@ -120,6 +134,22 @@ authorization: Basic {{authentication}}
 GET {{baseUrl}}/users/{{userNameShort}}?name={{contextName}}&includepermissions=True
 authorization: Basic {{authentication}}
 
+
+### Forwards
+
+### Create a Forward
+
+// @name createForward
+POST {{baseUrl}}/mail/forwards?name={{contextName}}
+authorization: Basic {{authentication}}
+Content-Type: application/json
+
+{
+    "address": "tester@example.com",
+    "forwardTo": [
+        "tester2@example.com"
+    ]
+}
 
 
 
@@ -363,3 +393,43 @@ POST {{httpApiBaseUrl}}/login?action=tokenLogin&authId={{authId}}&jsonResponse=t
 Content-Type: application/x-www-form-urlencoded
 
 login={{userNameShort}}&password={{password}}&client=loginPage&version=1.0&clientToken={{clientToken}}
+
+
+### Get Inbox
+// @name getInbox
+GET {{httpApiBaseUrl}}/config?session={{httpLogin.response.body.session}}
+Cookie: {{login.response.headers.set-cookie}}
+
+### Upload Mail
+// @name uploadMail
+POST {{httpApiBaseUrl}}/mail?action=import&folder=default0%2FINBOX&force=true&session={{httpLogin.response.body.session}}
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundaryWa6Nc0Abswy6xdnH
+Cookie: {{login.response.headers.set-cookie}}
+
+------WebKitFormBoundaryWa6Nc0Abswy6xdnH
+Content-Disposition: form-data; name="file"; filename="filename.eml"
+Content-Type: message/rfc822
+
+< /Local/Path/To/File
+------WebKitFormBoundaryWa6Nc0Abswy6xdnH--
+
+### Get Calendar Folder
+// @name getCalendarFolder
+GET {{httpApiBaseUrl}}/config/folder/calendar?session={{httpLogin.response.body.session}}
+Cookie: {{login.response.headers.set-cookie}}
+
+### Upload file to Drive
+POST {{httpApiBaseUrl}}/files?action=new&extendedResponse=true&force_json_response=true&session={{httpLogin.response.body.session}}
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundaryWa6Nc0Abswy6xdnH
+Cookie: {{login.response.headers.set-cookie}}
+
+------WebKitFormBoundaryWa6Nc0Abswy6xdnH
+Content-Disposition: form-data; name="json"
+
+{"folder_id":"74","description":""}
+------WebKitFormBoundaryWa6Nc0Abswy6xdnH
+Content-Disposition: form-data; name="file"; filename="Fahrwerk.jpg"
+Content-Type: image/jpeg
+
+< /Local/Path/To/File
+------WebKitFormBoundaryWa6Nc0Abswy6xdnH--

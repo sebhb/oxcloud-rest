@@ -54,10 +54,12 @@
 GET {{baseUrl}}/contexts
 authorization: Basic {{authentication}}
 
+
 ### Search Context
 // @name searchContext
 GET {{baseUrl}}/contexts?pattern=*{{contextShortName}}*
 authorization: Basic {{authentication}}
+
 
 ### Create Context
 // @name createContext
@@ -72,10 +74,12 @@ authorization: Basic {{authentication}}
     "adminPassword": "98zgtbhnj/&ZH"
 }
 
+
 ### Delete Context
 // @name deleteContext
 DELETE {{baseUrl}}/contexts/{{contextName}}
 authorization: Basic {{authentication}}
+
 
 ### Change Number of Maximum Users
 // @name changeMaxNumberOfUsers
@@ -112,22 +116,25 @@ Content-Type: application/json
 authorization: Basic {{authentication}}
 
 {
-    "name": "{{userNameShort}}",
+    "name": "{{userName}}",
     "password": "{{password}}",
     "givenName": "{{userGivenName}}",
     "surName": "{{userSurName}}",
     "mail": "{{userName}}"
 }
 
+
 ### Delete User
 // @name deleteUser
 DELETE {{baseUrl}}/users/{{userNameShort}}?name={{contextName}}
 authorization: Basic {{authentication}}
 
+
 ### Get Users
 // @name getUsers
 GET {{baseUrl}}/users?name={{contextName}}
 authorization: Basic {{authentication}}
+
 
 ### Get One User (Search)
 // @name getSpecificUser
@@ -169,6 +176,7 @@ authorization: Basic {{authentication}}
         ]
 }
 
+
 ### Change One User to Productivity
 // @name changeSpecificUserToProductivity
 PUT {{baseUrl}}/users/{{userNameShort}}?name={{contextName}}
@@ -197,6 +205,7 @@ authorization: Basic {{authentication}}
     "fileQuota": null
 }
 
+
 # Note that you can use either mailQuota and fileQuota
 # or unifiedQuota. But you can not use unifiedQuota 
 # in combination with any of the other two.
@@ -220,6 +229,7 @@ authorization: Basic {{authentication}}
     }
 }
 
+
 ### Change Brand Theme
 // @name changeBrandTheme
 POST {{baseUrl}}/brand/theme
@@ -231,6 +241,7 @@ authorization: Basic {{authentication}}
     "linkColor": "#283f73",
     "toolbarColor": "#283f73"
 }
+
 
 # Changing the theme of a context overrides the theme of the branding.
 
@@ -252,29 +263,35 @@ Content-Type: application/x-www-form-urlencoded
 
 {{credentials}}
 
+
 ### Log Out
 // @name logOut
 POST {{httpApiBaseUrl}}/login?action=logout&session={{httpLogin.response.body.session}}
+
 
 ### Config
 // @name getConfig
 GET {{httpApiBaseUrl}}/config?session={{httpLogin.response.body.session}}
 Cookie: {{login.response.headers.set-cookie}}
 
+
 ### Get User
 // @name getUser
 GET {{httpApiBaseUrl}}/user?action=get&session={{httpLogin.response.body.session}}
 Cookie: {{login.response.headers.set-cookie}}
+
 
 ### Get Me
 // @name getMe
 GET {{httpApiBaseUrl}}/user/me?session={{httpLogin.response.body.session}}
 Cookie: {{login.response.headers.set-cookie}}
 
+
 ### Get All Users
 // @name getAllUsers
 GET {{httpApiBaseUrl}}/user?action=all&columns=1,501,502,555,556,557&session={{httpLogin.response.body.session}}
 Cookie: {{login.response.headers.set-cookie}}
+
 
 # Note
 # 1. The admin user by default is "invisible". This can be changed via the JSlob value `io.ox/contacts//showAdmin`.
@@ -300,10 +317,12 @@ Cookie: {{login.response.headers.set-cookie}}
 GET {{httpApiBaseUrl}}/snippet?action=all&session={{httpLogin.response.body.session}}
 Cookie: {{login.response.headers.set-cookie}}
 
+
 ### Get All Signatures
 // @name getAllSignatures
 GET {{httpApiBaseUrl}}/snippet?action=all&type=signature&session={{httpLogin.response.body.session}}
 Cookie: {{login.response.headers.set-cookie}}
+
 
 ### Create New Signature
 // @name newSignature
@@ -321,6 +340,7 @@ Content-Type: text/javascript
       "module": "io.ox/mail",
       "type": "signature"
 }
+
 
 ### Update Signature
 // @name updateSignature
@@ -355,6 +375,7 @@ Content-Type: text/javascript
         "{{userName}}": "{{getAllSignatures.response.body.data[0].id}}"
     }
 }
+
 
 # Misc JSlob
 
@@ -395,10 +416,20 @@ Content-Type: application/x-www-form-urlencoded
 login={{userNameShort}}&password={{password}}&client=loginPage&version=1.0&clientToken={{clientToken}}
 
 
-### Get Inbox
-// @name getInbox
-GET {{httpApiBaseUrl}}/config?session={{httpLogin.response.body.session}}
+### Check mail folder
+// @name checkMailFolder
+GET {{httpApiBaseUrl}}/mail?action=examine&folder=default0%2FINBOX&session={{httpLogin.response.body.session}}
 Cookie: {{login.response.headers.set-cookie}}
+
+
+### Create New Mail Folder
+// @name createNewMailFolder
+PUT {{httpApiBaseUrl}}/folders?action=new&autorename=true&folder_id=default0&session={{httpLogin.response.body.session}}
+Cookie: {{login.response.headers.set-cookie}}
+Content-Type: text/javascript
+
+{"module":"mail","subscribed":1,"title":"Testfolder","silent":false}
+
 
 ### Upload Mail
 // @name uploadMail
@@ -413,12 +444,61 @@ Content-Type: message/rfc822
 < /Local/Path/To/File
 ------WebKitFormBoundaryWa6Nc0Abswy6xdnH--
 
+
 ### Get Calendar Folder
 // @name getCalendarFolder
 GET {{httpApiBaseUrl}}/config/folder/calendar?session={{httpLogin.response.body.session}}
 Cookie: {{login.response.headers.set-cookie}}
 
+
+### Get all events
+// @name getAllEvents
+GET {{httpApiBaseUrl}}/chronos?action=all&fields=id&rangeStart=20240101T220000Z&rangeEnd=20260101T220000Z&session={{httpLogin.response.body.session}}
+Cookie: {{login.response.headers.set-cookie}}
+
+
+### Delete specific events by ID
+// @name deleteEvents
+PUT {{httpApiBaseUrl}}/chronos?action=delete&scheduling=none&session={{httpLogin.response.body.session}}
+Cookie: {{login.response.headers.set-cookie}}
+Content-Type: text/javascript
+
+{
+    "events": [
+        "29", "38"
+    ]
+}
+
+
+### Get Drive Root Folder
+// @name getDriveRootFolder
+GET {{httpApiBaseUrl}}/config/folder/infostore?session={{httpLogin.response.body.session}}
+Cookie: {{login.response.headers.set-cookie}}
+
+
+### Get Drive Folder Content
+// @name getDriveFolderContent
+GET {{httpApiBaseUrl}}/folders?action=list&columns=1,300&parent={{getDriveRootFolder.response.body.data}}&session={{httpLogin.response.body.session}}
+Cookie: {{login.response.headers.set-cookie}}
+
+
+### Get Folder Updates
+// @name getFolderUpdates
+GET {{httpApiBaseUrl}}/folders?action=updates&allowed_modules=infostore&columns=1,300&timestamp={{getDriveFolderContent.response.body.timestamp}}&parent={{getDriveRootFolder.response.body.data}}&session={{httpLogin.response.body.session}}
+Cookie: {{login.response.headers.set-cookie}}
+
+
+### Create New Drive Folder
+// @name createNewDriveFolder
+PUT {{httpApiBaseUrl}}/folders?action=new&folder_id={{getDriveRootFolder.response.body.data}}&session={{httpLogin.response.body.session}}
+Cookie: {{login.response.headers.set-cookie}}
+Content-Type: text/javascript
+
+{"module":"infostore","title":"Testfolder"}
+
+
 ### Upload file to Drive
+// @name uploadFileToDrive
 POST {{httpApiBaseUrl}}/files?action=new&extendedResponse=true&force_json_response=true&session={{httpLogin.response.body.session}}
 Content-Type: multipart/form-data; boundary=----WebKitFormBoundaryWa6Nc0Abswy6xdnH
 Cookie: {{login.response.headers.set-cookie}}
@@ -433,3 +513,61 @@ Content-Type: image/jpeg
 
 < /Local/Path/To/File
 ------WebKitFormBoundaryWa6Nc0Abswy6xdnH--
+
+
+### Get all users
+// @name getAllUsers
+GET {{httpApiBaseUrl}}/contacts?action=all&columns=1,501,502,555,556,557&folder={{getAddressbookFolder.response.body.data}}&session={{httpLogin.response.body.session}}
+Cookie: {{login.response.headers.set-cookie}}
+
+
+### Get Addressbook Folder
+// @name getAddressbookFolder
+GET {{httpApiBaseUrl}}/config/folder/contacts?session={{httpLogin.response.body.session}}
+Cookie: {{login.response.headers.set-cookie}}
+
+
+### Create new contact in Addressbook
+// @name createNewContact
+PUT {{httpApiBaseUrl}}/addressbooks?action=new&session={{httpLogin.response.body.session}}
+Cookie: {{login.response.headers.set-cookie}}
+Content-Type: text/javascript
+
+{
+    "display_name":"Nach, Vor",
+    "first_name":"Vor",
+    "last_name":"Nach",
+    "categories":[],
+    "folder_id":"con://0/{{getAddressbookFolder.response.body.data}}"
+}
+
+
+### Create new contact in Addressbook with Avatar
+// @name createNewContactWithAvatar
+POST {{httpApiBaseUrl}}/addressbooks?action=new&force_json_response=true&session={{httpLogin.response.body.session}}
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundarycM608zLbtYE68ZjI
+Cookie: {{login.response.headers.set-cookie}}
+
+------WebKitFormBoundarycM608zLbtYE68ZjI
+Content-Disposition: form-data; name="file"; filename="cropped.jpeg"
+Content-Type: image/jpeg
+
+< /Users/seb/Desktop/Jimmi.png
+------WebKitFormBoundarycM608zLbtYE68ZjI
+Content-Disposition: form-data; name="json"
+
+{"display_name":"K, Jimmi","first_name":"Jimmi","last_name":"ll","email1":"mail@example.com","cellular_telephone1":"phne","categories":[],"folder_id":"con://0/{{getAddressbookFolder.response.body.data}}"}
+------WebKitFormBoundarycM608zLbtYE68ZjI--
+
+
+### Sample Multiple Request
+// @name multipleRequest
+PUT {{httpApiBaseUrl}}/multiple?session={{httpLogin.response.body.session}}
+Cookie: {{login.response.headers.set-cookie}}
+Content-Type: text/javascript
+
+[
+    {"module":"config/folder/infostore"},
+    {"module":"config/folder/calendar"}
+]
+

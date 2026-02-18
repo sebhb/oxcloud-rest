@@ -45,6 +45,7 @@
 @password = secret
 @credentials = name={{userNameShort}}&password={{password}}
 
+@sharedDomainName = example.com
 
 
 ### Contexts
@@ -211,6 +212,21 @@ authorization: Basic {{authentication}}
 # in combination with any of the other two.
 
 
+### Shared Domains
+# Shared Domains are an integral concept on OX Cloud.
+# Make sure to read the documentation at https://confluence-public.open-xchange.com/spaces/OASC/pages/51774556/OX+Cloud+Provisioning+101#OXCloudProvisioning101-HowdohandleDomainsonOXCloud?
+
+### Create Shared Domain
+// @name createSharedDomain
+POST {{baseUrl}}/mail/shareddomains/{{sharedDomainName}}
+Content-Type: application/json
+authorization: Basic {{authentication}}
+
+
+### Get Shared Domains
+// @name getSharedDomains
+GET {{baseUrl}}/mail/shareddomains
+authorization: Basic {{authentication}}
 
 
 

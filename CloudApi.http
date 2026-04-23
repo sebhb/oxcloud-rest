@@ -587,3 +587,43 @@ Content-Type: text/javascript
     {"module":"config/folder/calendar"}
 ]
 
+
+### Get mail forward rules
+// @name getMailRules
+GET {{httpApiBaseUrl}}/mailfilter/v2?action=list&session={{httpLogin.response.body.session}}
+Cookie: {{login.response.headers.set-cookie}}
+
+
+### Create mail forward rule
+
+# Attention:
+# Both, `id` and `position` need to be unique.
+# In order to achieve that uniquenes, first retrieve the list of existing forwards as demonstrated above and then use a new id and position
+// @name createMailForwardRule
+PUT {{httpApiBaseUrl}}/mailfilter/v2?action=new&session={{httpLogin.response.body.session}}
+Cookie: {{login.response.headers.set-cookie}}
+Content-Type: text/javascript
+
+{
+    "id": 0,
+    "position": 0,
+    "active": true,
+    "rulename": "Forward",
+    "test": {
+        "id": "true"
+    },
+    "actioncmds": [
+        {
+            "id": "redirect",
+            "to": "person.a@example.com"
+        },
+        {
+            "id": "redirect",
+            "to": "person.b@example.com"
+        },
+        {
+            "id": "move",
+            "into": "default0/INBOX"
+        }
+    ]
+}

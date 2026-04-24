@@ -599,6 +599,10 @@ Cookie: {{login.response.headers.set-cookie}}
 # Attention:
 # Both, `id` and `position` need to be unique.
 # In order to achieve that uniquenes, first retrieve the list of existing forwards as demonstrated above and then use a new id and position
+
+# Note:
+# The `actioncmds` contain a move as last action. THis is technically not required for a forward rule.
+# The purpose of this is to save the mail in the user's inbox. If this command weren't present, the mails would only be forwarded.
 // @name createMailForwardRule
 PUT {{httpApiBaseUrl}}/mailfilter/v2?action=new&session={{httpLogin.response.body.session}}
 Cookie: {{login.response.headers.set-cookie}}

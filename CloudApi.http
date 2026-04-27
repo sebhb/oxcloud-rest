@@ -285,12 +285,6 @@ Content-Type: application/x-www-form-urlencoded
 POST {{httpApiBaseUrl}}/login?action=logout&session={{httpLogin.response.body.session}}
 
 
-### Config
-// @name getConfig
-GET {{httpApiBaseUrl}}/config?session={{httpLogin.response.body.session}}
-Cookie: {{login.response.headers.set-cookie}}
-
-
 ### Get User
 // @name getUser
 GET {{httpApiBaseUrl}}/user?action=get&session={{httpLogin.response.body.session}}
@@ -631,3 +625,42 @@ Content-Type: text/javascript
         }
     ]
 }
+
+
+
+### Drive API
+
+# Strictly speaking, not only. 
+# But some Infostore calls that are directly relevant for using Drive.
+
+### Config
+// @name getConfig
+GET {{httpApiBaseUrl}}/config?session={{httpLogin.response.body.session}}
+Cookie: {{login.response.headers.set-cookie}}
+
+
+# Note: Not the entire tree has to be requested. 
+# If one particular attribute is of interest, the path inside the config
+# can be passed in the call.
+# E.g. in order to retrieve the root folder for the infostore,
+# /config/folder/infostore can be used for the request:
+
+### Get Infostore root
+// @name getInfostoreRootFolder
+GET {{httpApiBaseUrl}}/config/folder/infostore?session={{httpLogin.response.body.session}}
+Cookie: {{login.response.headers.set-cookie}}
+
+### Capabilities
+// @name getCapabilities
+GET {{httpApiBaseUrl}}/capabilities?action=get&id=drive&session={{httpLogin.response.body.session}}
+Cookie: {{login.response.headers.set-cookie}}
+
+
+### Get Drive API settings
+// @name getDriveAPI
+GET {{httpApiBaseUrl}}/drive?action=settings&root={{getInfostoreRootFolder.response.body.data}}&session={{httpLogin.response.body.session}}
+
+
+### Get Server Version
+// @name getServerVersion
+GET {{httpApiBaseUrl}}/version?action=version
